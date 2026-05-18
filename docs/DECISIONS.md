@@ -5,6 +5,28 @@
 
 ---
 
+### [2026-05-19] — Docker-only development and generated API types
+
+**Status**: accepted
+**Context**: Host-run FastAPI, PostgreSQL, or Redis can compete with Docker services and hide code-version drift. Handwritten frontend API types can drift from FastAPI contracts.
+**Decision**: Run backend services, migrations, backend tests, and seeders through Docker Compose. Generate `frontend/app/shared/types/schema.ts` from FastAPI OpenAPI with `pnpm generate:api` after API changes. Use generated `paths` and `components` types in frontend API wrappers.
+**Alternatives considered**: Allow host service commands for convenience; rejected because the project prioritizes reproducibility and avoiding hidden competing instances.
+**Consequences**: Contributors must keep Docker running for normal backend work and commit generated schema diffs with API changes.
+**Links**: [`docs/STACK.md`](STACK.md), [`AGENTS.md`](../AGENTS.md)
+
+---
+
+### [2026-05-19] — Reusable idempotent seeders
+
+**Status**: accepted
+**Context**: Development and testing need quick repeatable data setup without manual database edits.
+**Decision**: Add a Docker-run seed runner with registered idempotent seeders. Start with `demo_data` for the existing memoization user model and extend it with document/page records when those models land.
+**Alternatives considered**: Ad hoc SQL fixtures or copying patient-tracker domain data; rejected because seed data must match this project's domain and current schema.
+**Consequences**: New seed data must be added through `app/seeders` and must be safe to run repeatedly.
+**Links**: [`scripts/seed.py`](../scripts/seed.py)
+
+---
+
 ### [2026-05-19] — Parallel phase-scoped Git flow
 
 **Status**: accepted

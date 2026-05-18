@@ -25,6 +25,12 @@ export function createQueryClient(): QueryClient {
 					return;
 				}
 
+				// 401/403 are handled by the refresh interceptor in client.ts,
+				// which clears tokens and lets useAuthGuard redirect to /login.
+				if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+					return;
+				}
+
 				if (error instanceof ApiError) {
 					if (typeof error.detail === 'string' && error.detail.length > 0) {
 						globalErrorNotifier.notifyError(error.detail);

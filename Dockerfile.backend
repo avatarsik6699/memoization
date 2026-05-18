@@ -8,12 +8,16 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 # Copy dependency files first for layer caching
 COPY pyproject.toml uv.lock* ./
 
-# Install dependencies only (exclude local project until source is copied)
-RUN uv sync --frozen --no-dev --no-install-project
+# Install dependencies only (exclude local project until source is copied).
+# Dev dependencies are included because this image is also the Docker-only
+# development/test environment.
+RUN uv sync --frozen --dev --no-install-project
 
 # Copy application source
 COPY app/ ./app/
 COPY alembic/ ./alembic/
+COPY scripts/ ./scripts/
+COPY tests/ ./tests/
 COPY alembic.ini ./
 
 COPY entrypoint.sh ./entrypoint.sh

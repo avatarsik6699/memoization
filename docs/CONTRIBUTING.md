@@ -41,6 +41,9 @@ If the project only has `main` at the moment, replace `develop` with `main` unti
 - Keep file ownership narrow. If two people need the same file, coordinate before editing.
 - Pull latest before editing phase docs or other high-conflict files.
 - Do not mark a phase checklist item complete until the implementation exists and relevant checks pass.
+- Run backend services, migrations, backend tests, and seeders only through Docker Compose.
+- After API contract changes, run `docker compose exec frontend pnpm generate:api` and commit the generated `frontend/app/shared/types/schema.ts`.
+- Do not hand-write frontend API request/response types that duplicate generated OpenAPI schemas.
 
 High-conflict files:
 
@@ -51,8 +54,10 @@ High-conflict files:
 - `docs/PHASE_XX_NOTES.md`
 - Alembic migration files
 - shared API type/schema files
+- `frontend/app/shared/types/schema.ts`
 
 Only one person should create or edit database migrations at a time.
+Only `pnpm generate:api` should update `frontend/app/shared/types/schema.ts` during normal work.
 
 ## Contract Changes
 
@@ -77,6 +82,7 @@ Each PR should include:
 - short summary of behavior changed;
 - files or modules touched;
 - gate commands run and their result;
+- generated API types status when backend API contracts changed;
 - screenshots for visible UI changes;
 - notes about migrations, env vars, or API changes.
 

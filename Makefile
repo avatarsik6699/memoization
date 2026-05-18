@@ -1,19 +1,33 @@
-.PHONY: dev install migrate lint test deploy deploy-logs deploy-ps
+.PHONY: dev down install migrate seed seed-demo seed-all migrate-seed lint test deploy deploy-logs deploy-ps
 
 dev:
-	uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+	docker compose up --build
+
+down:
+	docker compose down
 
 install:
 	uv sync --dev
 
 migrate:
-	uv run alembic upgrade head
+	docker compose exec backend uv run alembic upgrade head
+
+seed:
+	docker compose exec backend uv run python scripts/seed.py --seeder demo_data
+
+seed-demo:
+	docker compose exec backend uv run python scripts/seed.py --seeder demo_data
+
+seed-all:
+	docker compose exec backend uv run python scripts/seed.py
+
+migrate-seed: migrate seed
 
 lint:
-	uv run ruff check . && uv run ruff format --check .
+	docker compose exec backend uv run ruff check . && docker compose exec backend uv run ruff format --check .
 
 test:
-	uv run pytest
+	docker compose exec backend uv run pytest
 
 # ── VPS deploy ─────────────────────────────────────────────────────────────
 # Usage: make deploy VPS_USER=ubuntu VPS_HOST=1.2.3.4 PROJECT_DIR=/opt/my-project

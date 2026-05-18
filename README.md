@@ -21,16 +21,15 @@ docker compose up --build
 ## Backend checks
 
 ```bash
-uv run alembic upgrade head
-uv run pytest tests/ -v
+docker compose exec backend uv run alembic upgrade head
+docker compose exec backend uv run pytest tests/ -v
 ```
 
 ## Frontend checks
 
 ```bash
-cd frontend
-pnpm install
-pnpm typecheck
-pnpm test
-pnpm build
+docker compose exec frontend pnpm generate:api
+docker compose exec frontend pnpm typecheck
+docker compose exec frontend pnpm test
+docker compose exec frontend pnpm build
 ```

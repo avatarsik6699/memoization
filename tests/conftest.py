@@ -6,7 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.pool import NullPool, StaticPool
 
-TEST_DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///:memory:")
+TEST_DATABASE_URL = os.environ.get("TEST_DATABASE_URL", "sqlite+aiosqlite:///:memory:")
 
 if TEST_DATABASE_URL.startswith("sqlite"):
     from sqlalchemy.dialects.sqlite.base import SQLiteTypeCompiler
@@ -55,7 +55,7 @@ async def test_engine():
 
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
-    
+
     await engine.dispose()
 
 
@@ -63,9 +63,7 @@ async def test_engine():
 async def db_session(test_engine) -> AsyncSession:
     session_factory = async_sessionmaker(test_engine, expire_on_commit=False)
     async with session_factory() as session:
-        existing_admin = await session.scalar(
-            select(User).where(User.email == "admin@example.com")
-        )
+        existing_admin = await session.scalar(select(User).where(User.email == "admin@example.com"))
         if existing_admin is None:
             session.add(
                 User(

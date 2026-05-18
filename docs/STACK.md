@@ -87,6 +87,9 @@ cd ..
 docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build
 ```
 
+Host `uv sync` and `pnpm install` are dependency setup commands only. Backend services, migrations,
+seeds, backend tests, PostgreSQL, Redis, and FastAPI must run through Docker Compose.
+
 ---
 
 ## Gate Commands
@@ -99,13 +102,14 @@ STACK.md` for those.
 | Gate check | Command | Preconditions / notes |
 |------------|---------|-----------------------|
 | Infrastructure / bootstrap | `cp .env.example .env && docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build` | Run from repo root; waits through Docker healthchecks. |
-| Migrations | `uv run alembic upgrade head` | Run from repo root after infrastructure is up. |
-| Backend / unit tests | `uv run pytest tests/ -v` | Run from repo root. |
-| Frontend prep | `cd frontend && pnpm install` | Install frontend dependencies before frontend checks. |
-| Frontend type-check | `cd frontend && pnpm typecheck` | |
-| Frontend unit tests | `cd frontend && pnpm test` | |
+| Migrations | `docker compose exec backend uv run alembic upgrade head` | Run from repo root after infrastructure is up. |
+| Backend / unit tests | `docker compose exec backend uv run pytest tests/ -v` | Run from repo root after infrastructure is up. |
+| Frontend prep | `docker compose exec frontend pnpm install` | Install frontend dependencies in the frontend container before frontend checks. |
+| Frontend API types | `docker compose exec frontend pnpm generate:api` | Required after API changes; commit the generated `frontend/app/shared/types/schema.ts`. |
+| Frontend type-check | `docker compose exec frontend pnpm typecheck` | |
+| Frontend unit tests | `docker compose exec frontend pnpm test` | |
 | E2E lint / determinism | `n/a` | |
-| E2E | `cd frontend && pnpm test:e2e:chromium` | Requires app reachable at `localhost:3000` and API at `localhost:8000`. |
+| E2E | `docker compose exec frontend pnpm test:e2e:chromium` | Requires app reachable at `localhost:3000` and API at `localhost:8000`. |
 | Smoke | `curl -f http://localhost:8000/api/v1/health && curl -f http://localhost:3000/` | Requires Docker Compose stack from infrastructure gate. |
 
 If the project ships a helper script, declare it:
@@ -121,16 +125,17 @@ If the project ships a helper script, declare it:
 ### Backend
 
 ```bash
-uv run alembic upgrade head
-uv run pytest tests/ -v
+docker compose exec backend uv run alembic upgrade head
+docker compose exec backend uv run pytest tests/ -v
 ```
 
 ### Frontend (if applicable)
 
 ```bash
-cd frontend && pnpm typecheck
-cd frontend && pnpm test
-cd frontend && pnpm test:e2e:chromium
+docker compose exec frontend pnpm generate:api
+docker compose exec frontend pnpm typecheck
+docker compose exec frontend pnpm test
+docker compose exec frontend pnpm test:e2e:chromium
 ```
 
 ---
@@ -156,18 +161,52 @@ cd frontend && pnpm test:e2e:chromium
 
 ```bash
 # Start the stack
-docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build
+docker compose up --build
 
 # Stop everything
-docker compose -f docker-compose.yml -f docker-compose.ci.yml down
+docker compose down
 
 # Add a new migration / schema change
-uv run alembic revision --autogenerate -m "describe change"
+docker compose exec backend uv run alembic revision --autogenerate -m "describe change"
 
 # Format / lint
-uv run ruff check . && uv run ruff format --check .
-cd frontend && pnpm lint
+docker compose exec backend uv run ruff check . && docker compose exec backend uv run ruff format --check .
+docker compose exec frontend pnpm lint
+
+# Regenerate frontend API types after API changes
+docker compose exec frontend pnpm generate:api
+
+# Seed development data
+docker compose exec backend uv run python scripts/seed.py --list
+docker compose exec backend uv run python scripts/seed.py --seeder demo_data
 ```
+
+## API Types
+
+`frontend/app/shared/types/schema.ts` is generated from FastAPI OpenAPI output with
+`openapi-typescript`. It is the only source of truth for frontend API request/response types.
+
+After changing any FastAPI endpoint, request schema, response schema, status code response shape, or
+OpenAPI-visible Pydantic model, run:
+
+```bash
+docker compose exec frontend pnpm generate:api
+```
+
+Commit the generated `schema.ts` diff with the backend API change. Do not hand-write duplicate
+frontend API types.
+
+## Seed Data
+
+Seeders run inside the backend container:
+
+```bash
+docker compose exec backend uv run python scripts/seed.py --list
+docker compose exec backend uv run python scripts/seed.py --dry-run
+docker compose exec backend uv run python scripts/seed.py --seeder demo_data
+```
+
+Seeders must be idempotent. Re-running the same seeder must not duplicate rows.
 
 ## Collaboration
 

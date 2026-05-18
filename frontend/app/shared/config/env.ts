@@ -18,7 +18,7 @@ type ServerEnvSchema = {
 };
 
 function readClientEnv(): ClientEnvSchema {
-	const fallbackApiBaseUrl = 'http://localhost:8000/api/v1';
+	const fallbackApiBaseUrl = 'http://localhost:8000';
 	const apiBaseUrlValue = import.meta.env.VITE_API_BASE_URL?.trim() || fallbackApiBaseUrl;
 
 	return {
@@ -37,7 +37,9 @@ function readServerEnv(): ServerEnvSchema {
 
 function validateApiBaseUrl(value: string): string {
 	try {
-		return new URL(value).toString();
+		const url = new URL(value);
+		url.pathname = url.pathname.replace(/\/api\/v1\/?$/, '') || '/';
+		return url.toString();
 	} catch {
 		throw new Error(`Invalid API base URL value: ${value}`);
 	}

@@ -18,6 +18,8 @@ services:
     volumes:
       - ./app:/app/app
       - ./alembic:/app/alembic
+      - ./scripts:/app/scripts
+      - ./tests:/app/tests
 
   frontend:
     # Run as the host user so bind-mounted writes (reports, build artifacts) stay owned

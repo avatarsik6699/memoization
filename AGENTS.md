@@ -14,12 +14,36 @@ must follow when working on this project. Anything specific to this project's te
 5. **Security**: No hardcoded secrets. Use `.env`, environment variables, and typed settings appropriate to the stack.
 6. **Context Sync**: After each phase completes, run the `context-update` workflow to refresh `docs/CONTEXT.md`, `docs/STATE.md`, and `docs/CHANGELOG.md`.
 7. **Output Discipline**: First the plan → wait for architect `✅` → code → tests → commit. Do not skip steps.
+8. **Docker Only**: Backend, database, Redis, migrations, seeds, and backend tests run through Docker Compose. Do not start FastAPI, PostgreSQL, or Redis directly on the host during normal development.
+9. **Generated API Types**: After any FastAPI endpoint, request schema, response schema, or OpenAPI-visible model changes, run `docker compose exec frontend pnpm generate:api` and commit the updated `frontend/app/shared/types/schema.ts`. Do not hand-write API types that duplicate generated OpenAPI types.
 
 ## Stack Conventions
 
 Before writing code, running commands, or reasoning about project layout, read **[docs/STACK.md](docs/STACK.md)**. It is the single source of truth for this project's concrete technologies, directory structure, setup commands, test tooling, and per-module style guides. When a user question depends on stack specifics (test commands, file locations, migration tool, e2e framework), consult `STACK.md` first.
 
 If a stack convention is missing from `STACK.md`, do not invent it — ask the user, then update `STACK.md` so the answer is durable.
+
+## Docker-Only Development
+
+Normal development must use Docker Compose for long-running services and backend commands:
+
+- Start services with `docker compose up --build` or `make dev`.
+- Run migrations with `docker compose exec backend uv run alembic upgrade head` or `make migrate`.
+- Run backend tests with `docker compose exec backend uv run pytest tests/ -v`.
+- Run seeders with `docker compose exec backend uv run python scripts/seed.py ...`.
+- Run frontend scripts with `docker compose exec frontend pnpm ...` when the Docker stack is up.
+
+Do not run host `uvicorn`, host PostgreSQL, or host Redis for normal development. This avoids hidden bugs from competing service instances and code-version drift. Host `uv` and `pnpm` may be used only for dependency installation or non-service tooling explicitly documented in `docs/STACK.md`.
+
+## API Type Generation
+
+`frontend/app/shared/types/schema.ts` is generated from FastAPI OpenAPI output and is the single source of truth for frontend API types.
+
+- Required after API changes: `docker compose exec frontend pnpm generate:api`.
+- Commit the resulting `frontend/app/shared/types/schema.ts` change with the API change.
+- Do not manually edit `schema.ts` except to recover from a broken generated file, and immediately regenerate afterwards.
+- Frontend API wrappers must import generated `paths` and `components` types from `@shared/types/schema`.
+- Do not create handwritten request/response interfaces that duplicate generated OpenAPI schemas.
 
 ## Library Documentation Lookup
 
@@ -72,7 +96,8 @@ Post the relevant handoff message from `docs/KNOWN_GOTCHAS.md` (if a matching en
 6. **Gate Before Commit**: Run the `phase-gate` workflow first. Never commit on ❌ FAIL.
 7. **Pull Requests**: Merge work through PRs into `develop` when `develop` exists. Until `develop` exists, PR into the current protected integration branch. Each PR must list completed phase tasks and gate commands run.
 8. **Review**: A second human should review each PR before merge. Agent-generated changes are not a substitute for human review.
-9. **Tagging**: After a phase branch merges to `develop`:
+9. **API Type Check**: PRs that change backend API contracts must include the regenerated `frontend/app/shared/types/schema.ts` diff from `docker compose exec frontend pnpm generate:api`.
+10. **Tagging**: After a phase branch merges to `develop`:
    ```bash
    git tag -a v0.N.0 -m "Phase N: [title]"
    ```
