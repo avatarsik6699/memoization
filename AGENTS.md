@@ -58,18 +58,38 @@ Post the relevant handoff message from `docs/KNOWN_GOTCHAS.md` (if a matching en
 
 ## Git Workflow
 
-1. **Branch Rule**: Work only in `feat/phase-N` branches. Never push directly to `main` or `develop`.
+1. **Branch Rule**: Work only in phase-scoped branches. Never push directly to `main` or `develop`.
    ```bash
-   git checkout -b feat/phase-01
+   git checkout -b feat/phase-01-auth
+   git checkout -b fix/phase-01-settings
+   git checkout -b docs/phase-01-contracts
    ```
-2. **No Destructive Git**: Never use `--force`, `git push --force`, `git rebase` on shared branches, or `git reset --hard` without explicit user instruction.
-3. **Conventional Commits**: `type(scope): description`, types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`.
+2. **Shared Branches**: `main`, `develop`, and any branch already used by another developer are shared branches. Do not rewrite their history. Do not work in another developer's branch unless explicitly invited.
+3. **Parallel Development**: Split work by task and file ownership. Prefer one PR per checklist item or tightly related group from `docs/PHASE_XX.md`. Do not bundle unrelated refactors into feature PRs.
+4. **No Destructive Git**: Never use `--force`, `git push --force`, `git rebase` on shared branches, or `git reset --hard` without explicit user instruction.
+5. **Conventional Commits**: `type(scope): description`, types: `feat`, `fix`, `chore`, `docs`, `test`, `refactor`.
    Example: `feat(phase-01): foundation — auth, db schema, API skeleton`.
-4. **Gate Before Commit**: Run the `phase-gate` workflow first. Never commit on ❌ FAIL.
-5. **Tagging**: After a phase branch merges to `develop`:
+6. **Gate Before Commit**: Run the `phase-gate` workflow first. Never commit on ❌ FAIL.
+7. **Pull Requests**: Merge work through PRs into `develop` when `develop` exists. Until `develop` exists, PR into the current protected integration branch. Each PR must list completed phase tasks and gate commands run.
+8. **Review**: A second human should review each PR before merge. Agent-generated changes are not a substitute for human review.
+9. **Tagging**: After a phase branch merges to `develop`:
    ```bash
    git tag -a v0.N.0 -m "Phase N: [title]"
    ```
+
+See [`docs/CONTRIBUTING.md`](docs/CONTRIBUTING.md) for the human collaboration workflow.
+
+## Parallel Development Rules
+
+This project is developed by an architect and a student in parallel. Keep coordination explicit:
+
+- Claim a task before starting it. Use GitHub Issues, a PR draft, or `docs/PHASE_XX_NOTES.md` if no issue tracker is active yet.
+- Keep file ownership narrow. If two tasks need the same files, coordinate before editing.
+- Only one person should create or edit database migrations at a time.
+- API contracts, schema changes, auth/security behavior, and `docs/SPEC.md` changes require architect approval before implementation.
+- Treat `docs/SPEC.md`, `docs/CONTEXT.md`, `docs/STATE.md`, `docs/PHASE_XX.md`, and `docs/PHASE_XX_NOTES.md` as high-conflict files. Pull latest before editing them and keep edits small.
+- Mark `docs/PHASE_XX.md` checklist items complete only after the code exists and relevant checks pass.
+- Do not modify another developer's incomplete task unless they hand it off.
 
 ## Spec Change Sync Protocol
 
@@ -110,8 +130,9 @@ The runtime wrappers are thin stubs — all workflow logic lives in `docs/playbo
 2.  spec-init         → drafts/resets/continues docs/SPEC.md (`--new` or `--continue`)
 3.  phase-init N      → creates docs/PHASE_N.md scaffold
 4.  Architect fills Contracts + Files sections
-5.  Implement scope on feat/phase-N branch:
+5.  Implement scope on phase-scoped branches:
     - Human developer works against the Scope checklist in PHASE_N.md
+    - Each parallel task uses its own branch, for example `feat/phase-01-auth`
     - Optional: `/phase-explore N [task-id|group]` → explores codebase in task context, writes
       Exploration findings to PHASE_N_NOTES.md; emits verdict `ready` or `needs-clarification`
     - Optional: `/impl-brief N [task-id|group]`  → generates Implementation Plan in PHASE_N_NOTES.md
@@ -120,10 +141,11 @@ The runtime wrappers are thin stubs — all workflow logic lives in `docs/playbo
 7.  Architect manual verification → add unchecked items to Architect Review Notes
 8.  phase-gate N      → ✅ PASS only when all automated checks green AND review notes all checked off
 9.  git commit        → feat(phase-N): [description]
-10. context-update N  → updates CONTEXT, STATE, CHANGELOG
-11. PR to develop     → human review → merge
-12. git tag -a v0.N.0 -m "Phase N: [title]"
-13. phase-init N+1    → repeat
+10. PR to develop     → human review → merge
+11. Repeat task branches until the phase scope is complete
+12. context-update N  → updates CONTEXT, STATE, CHANGELOG
+13. git tag -a v0.N.0 -m "Phase N: [title]"
+14. phase-init N+1    → repeat
 ```
 
 ### Implementation Path Guide

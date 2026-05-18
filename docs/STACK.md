@@ -168,3 +168,8 @@ uv run alembic revision --autogenerate -m "describe change"
 uv run ruff check . && uv run ruff format --check .
 cd frontend && pnpm lint
 ```
+
+## Collaboration
+
+Human collaboration and Git flow rules live in [`docs/CONTRIBUTING.md`](CONTRIBUTING.md).
+Agent operating rules live in [`AGENTS.md`](../AGENTS.md).
