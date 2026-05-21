@@ -6,6 +6,28 @@
 
 ---
 
+## [2026-05-21] — Phase 01 complete
+
+**Type**: phase-completion
+**Author**: AI (context-update)
+**Triggered by**: PHASE_01 gate passed
+
+### Changes
+- Built the anonymous offline editor workspace for `/` and `/:nodeId`.
+- Added Dexie-backed local persistence, document tree operations, Tiptap editing/autosave, i18n, theme support, storage visibility, PWA manifest/service worker behavior, and offline fallback.
+
+### Affected Phases
+- None (additive change)
+
+### Contract Updates
+- Added IndexedDB database `notesapp_v1` with `nodes`, `pages`, `uploads`, and `pending_changes` stores.
+- Added frontend contracts/types for `StorageAdapter`, `LocalAdapter`, `Page`, `TreeNode`, `CreateNodeInput`, local Dexie records, `TiptapDocumentJSON`, `ThemeMode`, and `LanguageCode`.
+- Added active UI routes `/` and `/:nodeId`.
+- No new PostgreSQL tables, backend API endpoints, or environment variables.
+
+### Notes
+- Anonymous uploads remain base64 in IndexedDB until a future cloud migration phase uploads images through `/api/upload/image`.
+
 ## [2026-05-20] — Root Workspace Route
 
 **Type**: spec-change

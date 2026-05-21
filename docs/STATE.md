@@ -15,7 +15,7 @@
 
 | Phase    | Status     | Tag    | Gate | Impl By | Notes |
 |----------|------------|--------|------|---------|-------|
-| PHASE_01 | ⏳ pending | v0.01.0 | ⬜ | — | Offline Editor |
+| PHASE_01 | ✅ done | v0.01.0 | ✅ | 🤝 hybrid | Offline Editor |
 
 <!-- Add new rows here via /phase-init N -->
 
