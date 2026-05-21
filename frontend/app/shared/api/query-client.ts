@@ -25,8 +25,7 @@ export function createQueryClient(): QueryClient {
 					return;
 				}
 
-				// 401/403 are handled by the refresh interceptor in client.ts,
-				// which clears tokens and lets useAuthGuard redirect to /login.
+				// 401/403 are handled by the refresh interceptor in client.ts, which clears tokens.
 				if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
 					return;
 				}

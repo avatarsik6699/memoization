@@ -71,7 +71,7 @@ Build an MVP Notion-like block editor for notes with these verifiable outcomes:
 
 | Journey | Flow |
 |---------|------|
-| Anonymous local editing | Open `/app`, create folders/pages, edit content, autosave to IndexedDB, view storage usage |
+| Anonymous local editing | Open `/`, create folders/pages, edit content, autosave to IndexedDB, view storage usage |
 | Register and migrate | Register with email/password, stay logged in immediately, choose whether to migrate local notes, upload local images, import nodes/pages, clear IndexedDB after success |
 | Existing user on new device | Log in with empty IndexedDB, fetch cloud tree/pages, use `CloudAdapter` |
 | Publish page | Mark page public, receive `/p/<slug>`, render read-only SSR page without auth |
@@ -252,7 +252,7 @@ routes. Every private data query must scope by `user_id`.
 | `POST` | `/api/auth/logout` | refresh cookie | Deletes session, clears cookie, returns `204` |
 | `GET` | `/api/auth/me` | JWT | Returns `{ id, email, email_verified, email_verify_deadline }` |
 | `POST` | `/api/auth/resend-verification` | JWT | Available only when email delivery is configured; otherwise returns `409 email_delivery_not_configured`; when enabled, rate limit 1 request per 5 minutes per user via Redis |
-| `GET` | `/auth/verify-email?token=<TOKEN>` | none, SSR loader | Validates token, marks email verified, redirects to `/app` with success toast |
+| `GET` | `/auth/verify-email?token=<TOKEN>` | none, SSR loader | Validates token, marks email verified, redirects to `/` with success toast |
 
 Access tokens are JWTs with payload `{ sub: user_id, email_verified: bool }` and TTL 15 minutes.
 Refresh tokens are random 64-character hex values stored only as SHA-256 hashes in `sessions`, sent
@@ -335,12 +335,11 @@ external clients:
 
 | Route | Mode | Purpose | Indexing |
 |-------|------|---------|----------|
-| `/` | SSR | Landing page | index |
+| `/` | CSR app shell | Notes workspace | noindex |
 | `/login` | SSR | Login form | noindex |
 | `/register` | SSR | Registration form | noindex |
 | `/auth/verify-email` | SSR loader | Email verification redirect | noindex |
-| `/app` | CSR app shell | Notes workspace | noindex |
-| `/app/:nodeId` | CSR app shell | Selected page | noindex |
+| `/:nodeId` | CSR app shell | Selected page | noindex |
 | `/p/:slug` | SSR + HTTP cache | Public read-only page | index |
 
 Public pages use `Cache-Control: public, max-age=60, stale-while-revalidate=300`.
@@ -426,7 +425,7 @@ The clear action offers two choices: delete everything, or delete images only.
 
 ### 5.6 PWA, i18n, and Theme
 
-- PWA manifest: `name=Notes App`, `short_name=Notes`, `start_url=/app`, `display=standalone`,
+- PWA manifest: `name=Notes App`, `short_name=Notes`, `start_url=/`, `display=standalone`,
   white background, dark theme color, 192/512/maskable icons.
 - Workbox strategies: static assets `CacheFirst`, HTML `NetworkFirst`, `/api/*` `NetworkOnly`,
   `/uploads/*` `StaleWhileRevalidate`, fallback `/offline.html`.

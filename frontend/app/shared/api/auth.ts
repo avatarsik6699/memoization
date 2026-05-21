@@ -20,11 +20,11 @@ export function useAuthToken() {
 }
 
 export function useMe() {
-	const { data: token } = useAuthToken();
+	const tokenQuery = useAuthToken();
 
 	return useQuery({
 		queryKey: authQueryKeys.me,
-		enabled: Boolean(token?.access_token),
+		enabled: Boolean(tokenQuery.data?.access_token),
 		queryFn: () => api.get('/api/v1/public/auth/me'),
 	});
 }

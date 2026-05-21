@@ -1,12 +1,11 @@
-import HomePage from '@pages/home';
+import type React from 'react';
+
+import { OfflineWorkspace } from '@/modules/app-shell/offline-workspace';
 
 export function meta() {
-	return [
-		{ title: 'Template App' },
-		{ name: 'description', content: 'Reusable FastAPI + React Router SSR template.' },
-	];
+	return [{ title: 'memoization' }, { name: 'description', content: 'Offline-first local document editor.' }];
 }
 
-export default function HomeRoute() {
-	return <HomePage />;
-}
+const IndexRoute: React.FC = () => <OfflineWorkspace />;
+
+export default IndexRoute;

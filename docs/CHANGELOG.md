@@ -6,6 +6,26 @@
 
 ---
 
+## [2026-05-20] — Root Workspace Route
+
+**Type**: spec-change
+**Author**: AI (spec-sync)
+**Triggered by**: Architect requested removing template chrome and making the workspace the root app surface.
+
+### Changes
+- `SPEC.md` §2.2, §5.1, and §5.6 now define the anonymous workspace at `/`, selected pages at `/:nodeId`, and PWA `start_url=/`.
+
+### Affected Phases
+- PHASE_01 — anonymous workspace routing and PWA manifest behavior changed from `/app` to `/`.
+
+### Contract Updates
+- No backend API, database, generated type, or environment contract change.
+
+### Notes
+- `CONTEXT.md` was left unchanged because active UI pages are not yet captured there.
+
+---
+
 ## v1.0 — 2026-05-18 — Initial Setup
 
 **Type**: initial-setup

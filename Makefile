@@ -1,4 +1,4 @@
-.PHONY: dev down install migrate seed seed-demo seed-all migrate-seed lint test deploy deploy-logs deploy-ps
+.PHONY: dev down install migrate seed seed-demo seed-all migrate-seed lint test e2e-install e2e deploy deploy-logs deploy-ps
 
 dev:
 	docker compose up --build
@@ -28,6 +28,12 @@ lint:
 
 test:
 	docker compose exec backend uv run pytest
+
+e2e-install:
+	cd frontend && pnpm test:e2e:install
+
+e2e:
+	cd frontend && pnpm test:e2e:local
 
 # ── VPS deploy ─────────────────────────────────────────────────────────────
 # Usage: make deploy VPS_USER=ubuntu VPS_HOST=1.2.3.4 PROJECT_DIR=/opt/my-project

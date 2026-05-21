@@ -11,6 +11,13 @@
 
 ## Gotcha Log
 
+### Playwright E2E runs on the host, not in the frontend container
+
+- **Symptoms**: `docker compose exec frontend pnpm test:e2e:chromium` fails with missing Playwright browser executables, or an agent proposes switching `Dockerfile.frontend` from Alpine to Debian only for browser dependencies.
+- **Root cause**: the frontend image is intentionally lightweight and does not install Playwright browsers. E2E is a documented local exception to the Docker-only rule.
+- **Fix**: keep the Docker stack running so the app is available at `http://localhost:3000`, install browsers once on the host with `cd frontend && pnpm test:e2e:install`, then run `cd frontend && pnpm test:e2e:local` or `make e2e`.
+- **Agent protocol**: do not add Playwright browser installation to `Dockerfile.frontend`. For frontend typecheck/unit tests use Docker commands from `docs/STACK.md`; for E2E use the documented host command.
+
 ### Docker-owned files break host operations (`EACCES` / `EPERM` / read-only)
 
 > Keep this entry only if the project uses Docker bind mounts. Otherwise delete it.

@@ -56,26 +56,28 @@ type PathsWithMethod<M extends HttpMethod> = {
 	[P in ApiPath]: Operation<P, M> extends never ? never : P;
 }[ApiPath];
 
-type RequestBody<P extends ApiPath, M extends HttpMethod> = Operation<P, M> extends {
-	requestBody: { content: { 'application/json': infer B } };
-}
-	? B
-	: never;
+type RequestBody<P extends ApiPath, M extends HttpMethod> =
+	Operation<P, M> extends {
+		requestBody: { content: { 'application/json': infer B } };
+	}
+		? B
+		: never;
 
-type SuccessResponse<P extends ApiPath, M extends HttpMethod> = Operation<P, M> extends { responses: infer R }
-	? R extends { 200: { content: { 'application/json': infer T } } }
-		? T
-		: R extends { 201: { content: { 'application/json': infer T } } }
+type SuccessResponse<P extends ApiPath, M extends HttpMethod> =
+	Operation<P, M> extends { responses: infer R }
+		? R extends { 200: { content: { 'application/json': infer T } } }
 			? T
-			: R extends { 204: unknown }
-				? undefined
-				: never
-	: never;
+			: R extends { 201: { content: { 'application/json': infer T } } }
+				? T
+				: R extends { 204: unknown }
+					? undefined
+					: never
+		: never;
 
 type QueryValue = string | number | boolean | null | undefined;
 type PathParamValue = string | number | boolean;
 
-interface RequestOptions<TBody> {
+type RequestOptions<TBody> = {
 	headers?: HeadersInit;
 	signal?: AbortSignal;
 	body?: TBody;
@@ -85,7 +87,7 @@ interface RequestOptions<TBody> {
 		query?: Record<string, QueryValue>;
 		path?: Record<string, PathParamValue>;
 	};
-}
+};
 
 export class ApiError extends Error {
 	status: number;
@@ -122,7 +124,11 @@ function resolvePath(path: string, pathParams?: Record<string, PathParamValue>):
 	});
 }
 
-function buildUrl(path: string, query?: Record<string, QueryValue>, pathParams?: Record<string, PathParamValue>): string {
+function buildUrl(
+	path: string,
+	query?: Record<string, QueryValue>,
+	pathParams?: Record<string, PathParamValue>
+): string {
 	const apiBaseUrl = getApiBaseUrl();
 	const normalizedBase = apiBaseUrl.endsWith('/') ? apiBaseUrl : `${apiBaseUrl}/`;
 	const resolvedPath = resolvePath(path, pathParams);
@@ -177,11 +183,7 @@ async function request<TResponse, TBody = unknown>(
 
 				if (!retryResponse.ok) {
 					const retryDetail = await readErrorDetail(retryResponse);
-					throw new ApiError(
-						retryResponse.status,
-						retryDetail,
-						retryResponse.headers.get('X-Request-ID') ?? undefined
-					);
+					throw new ApiError(retryResponse.status, retryDetail, retryResponse.headers.get('X-Request-ID') ?? undefined);
 				}
 
 				if (retryResponse.status === 204) return undefined as TResponse;

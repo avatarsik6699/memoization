@@ -36,19 +36,26 @@ Look up `PHASE_[XX-1]` in `docs/STATE.md`:
 - Anything else → warn: "PHASE_[XX-1] is not marked done (status: [status]). Starting the next phase before completing the previous one may cause context drift. Proceed anyway?" Wait for confirmation.
 - Creating `PHASE_01` (no predecessor) → skip this check.
 
-### 3. Request phase design assets (optional)
+### 3. Resolve phase design assets
 
-If the phase scope includes any frontend UI work, ask:
+If the phase scope includes any frontend UI work, first scan `docs/assets/*.png` for design
+references committed to the project. These assets are the default design source for every phase.
 
-> "Are there Figma screenshots for any screens in Phase [XX]? Attach them now, or type 'skip'."
+If matching assets exist:
 
-If screenshots are provided:
-
-- For each screenshot, note the screen name and what it depicts (layout, key components, interactions).
+- For each asset relevant to the phase, note the file path, screen name, and what it depicts
+  (layout, key components, interactions).
 - Add a `## Design References` section to the phase doc (placed after `## Phase Goal`, before `## Scope`) listing each screen with a one-line description.
 - Use the screenshots to make the `### Frontend` scope checkboxes more concrete (specific component names, layout decisions visible in the design).
 
-If skipped: omit the `## Design References` section from the phase doc entirely.
+If no relevant assets are found in `docs/assets` but frontend UI is in scope, ask:
+
+> "Are there Figma screenshots for any screens in Phase [XX]? Attach them now, or type 'skip'."
+
+If screenshots are provided, handle them the same way as committed assets.
+
+If skipped and no committed assets are relevant: omit the `## Design References` section from the
+phase doc entirely.
 
 ### 4. Extract scope and contracts from `docs/SPEC.md`
 

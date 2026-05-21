@@ -35,6 +35,9 @@ RUN corepack enable \
 
 USER node
 
+COPY --from=deps --chown=node:node /app/package.json /app/pnpm-lock.yaml ./
+RUN pnpm install --prod --frozen-lockfile
+
 COPY --from=builder --chown=node:node /app/build ./build
 
 EXPOSE 3000

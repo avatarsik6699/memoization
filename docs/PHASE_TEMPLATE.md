@@ -23,9 +23,10 @@
 
 ## Design References
 
-<!-- Optional. Populated by /phase-init when design assets (Figma, mockups, screenshots) are provided.
+<!-- Optional. Populated by /phase-init from committed docs/assets/*.png files first, then from
+     newly attached design assets (Figma, mockups, screenshots) if no relevant repo assets exist.
      Remove this section entirely if no design assets exist for this phase.
-     Format: `Screen name — brief description (key components, interactions)` -->
+     Format: `Screen name — docs/assets/file.png — brief description (key components, interactions)` -->
 
 <!-- none provided -->
 
@@ -131,6 +132,9 @@ If this phase needs a custom smoke target or other phase-specific note, record i
 Use this section after manual verification. Add one checkbox item per issue the architect wants
 fixed before the phase can close. Leave the item unchecked while it is still open. Check it off
 only after the fix is implemented and re-verified.
+To have the agent fix open items using the normal explore → plan → implement pipeline, run
+`/impl-review-notes [XX]`. The workflow records metadata in `docs/PHASE_[XX]_NOTES.md` and does
+not create a branch, classify the issue, run gate/sync workflows, or commit automatically.
 If manual verification found nothing, keep the default checked line below.
 
 - [x] No architect review issues recorded

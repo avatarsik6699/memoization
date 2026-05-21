@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { api } from '@shared/api/client';
-import { queryClient } from '@shared/api/query-client';
 import { authQueryKeys } from '@shared/api/keys';
+import { queryClient } from '@shared/api/query-client';
 import { jwtService } from '@shared/services/jwt-service';
 import type { components } from '@shared/types/schema';
 

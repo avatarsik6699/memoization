@@ -8,6 +8,7 @@
   - ### Exploration          — written by agent (/phase-explore). Optional; skip for simple tasks.
   - ### Implementation Plan  — written by agent (/impl-brief). Agent may update only this section.
   - ### Decisions & Notes    — written by human. NEVER overwritten by agent.
+  - ## Review Notes Fixes    — written by agent (/impl-review-notes) for Architect Review Notes fixes.
 
   Sync rule: task IDs (B1, F1, I1 …) must match the Scope checklist in PHASE_[XX].md.
   To add an unplanned task discovered mid-phase, run /phase-add-task [XX] "description" — it
@@ -34,3 +35,9 @@ _Phase:_ `[XX]` · _Generated:_ `[DATE]`
 
 ### Decisions & Notes
 <!-- Document implementation decisions, deviations from plan, and lessons learned. -->
+
+---
+
+## Review Notes Fixes
+<!-- Populated by `/impl-review-notes [XX]` when Architect Review Notes require fixes.
+     Each fix records Exploration, Implementation Plan, and Implementation Notes. -->

@@ -112,13 +112,14 @@ Files to copy from `project-files/` to the target root, preserving structure:
 - `AGENTS.md` → `AGENTS.md`
 - `CLAUDE.md` → `CLAUDE.md`
 - `.mcp.json` → `.mcp.json`
-- `.claude/skills/<8 skills>/SKILL.md` → `.claude/skills/<8 skills>/SKILL.md`
+- `.claude/skills/<9 skills>/SKILL.md` → `.claude/skills/<9 skills>/SKILL.md`
   (spec-init, phase-init, phase-gate, spec-sync, context-update, impl-brief, impl-assist,
-  project-sync)
+  impl-review-notes, project-sync)
 - `plugins/sdd-workflow/` → `plugins/sdd-workflow/` (commands, skills, hooks.json, .mcp.json,
   .codex-plugin/, scripts/, README.md)
-- `docs/playbooks/<9 playbooks>.md` → `docs/playbooks/<9 playbooks>.md` (includes `workflow-init.md`
-  for future-self reference, plus `impl-brief.md`, `impl-assist.md`, and `project-sync.md`)
+- `docs/playbooks/<10 playbooks>.md` → `docs/playbooks/<10 playbooks>.md` (includes
+  `workflow-init.md` for future-self reference, plus `impl-brief.md`, `impl-assist.md`,
+  `impl-review-notes.md`, and `project-sync.md`)
 - `docs/templates/SPEC.md` → `docs/SPEC.md` (only if missing)
 - `docs/templates/STATE.md` → `docs/STATE.md` (only if missing)
 - `docs/templates/CHANGELOG.md` → `docs/CHANGELOG.md` (only if missing)

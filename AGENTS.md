@@ -74,6 +74,14 @@ Keep lightweight long-lived project memory in `docs/` so future sessions recover
 
 Consult and update these files as part of normal development. Keep them concise and current.
 
+## Design References
+
+Use committed screenshots in `docs/assets/` as the durable design source for phase documents and UI
+implementation. When running `phase-init` for any phase with frontend UI scope, scan
+`docs/assets/*.png`, include the phase-relevant assets in `## Design References`, and use them to
+make frontend scope tasks concrete. Ask for additional screenshots only when no relevant committed
+asset exists.
+
 ## Filesystem Permission Failures
 
 On `EACCES`, `EPERM`, "Permission denied", or "Read-only file system" errors: **stop immediately**. Do NOT `sudo`, `chmod -R 777`, delete-and-recreate the file elsewhere, or silently skip the step.
@@ -138,11 +146,12 @@ The SDD workflows are defined in `docs/playbooks/`:
 - [`impl-brief`](docs/playbooks/impl-brief.md) — generate a concrete implementation plan for phase tasks (optional)
 - [`phase-explore`](docs/playbooks/phase-explore.md) — explore the codebase for task context before planning (optional)
 - [`impl-assist`](docs/playbooks/impl-assist.md) — implement uncompleted phase tasks (optional)
+- [`impl-review-notes`](docs/playbooks/impl-review-notes.md) — fix unchecked Architect Review Notes with exploration, plan, and implementation metadata
 - [`project-sync`](docs/playbooks/project-sync.md) — sync phase tasks to GitHub Issues + GitHub Projects board (optional; requires `gh` CLI and a GitHub remote)
 
 Different runtimes expose them differently:
 
-- **Claude Code**: slash commands (`/spec-init`, `/phase-init`, `/phase-gate`, `/spec-sync`, `/context-update`, `/impl-brief`, `/impl-assist`, `/project-sync`) defined under `.claude/skills/`.
+- **Claude Code**: slash commands (`/spec-init`, `/phase-init`, `/phase-gate`, `/spec-sync`, `/context-update`, `/impl-brief`, `/impl-assist`, `/impl-review-notes`, `/project-sync`) defined under `.claude/skills/`.
 - **Codex**: slash commands defined under `plugins/sdd-workflow/`.
 - **Other runtimes**: follow the markdown procedure in `docs/playbooks/` manually.
 
@@ -164,13 +173,14 @@ The runtime wrappers are thin stubs — all workflow logic lives in `docs/playbo
     - Optional: `/impl-assist N [task-id|group]` → agent implements uncompleted tasks
 6.  phase-gate N      → automated baseline
 7.  Architect manual verification → add unchecked items to Architect Review Notes
-8.  phase-gate N      → ✅ PASS only when all automated checks green AND review notes all checked off
-9.  git commit        → feat(phase-N): [description]
-10. PR to develop     → human review → merge
-11. Repeat task branches until the phase scope is complete
-12. context-update N  → updates CONTEXT, STATE, CHANGELOG
-13. git tag -a v0.N.0 -m "Phase N: [title]"
-14. phase-init N+1    → repeat
+8.  Optional: `/impl-review-notes N` → agent fixes unchecked Architect Review Notes in the current branch and records metadata in PHASE_N_NOTES.md
+9.  phase-gate N      → ✅ PASS only when all automated checks green AND review notes all checked off
+10. git commit        → feat(phase-N): [description]
+11. PR to develop     → human review → merge
+12. Repeat task branches until the phase scope is complete
+13. context-update N  → updates CONTEXT, STATE, CHANGELOG
+14. git tag -a v0.N.0 -m "Phase N: [title]"
+15. phase-init N+1    → repeat
 ```
 
 ### Implementation Path Guide
@@ -200,6 +210,7 @@ The runtime wrappers are thin stubs — all workflow logic lives in `docs/playbo
 | `### Exploration` | Agent (phase-explore) | Written once; re-run with `--force` to overwrite |
 | `### Implementation Plan` | Agent (impl-brief) | Written once; re-run with `--force` to overwrite |
 | `### Decisions & Notes` | Human only | Never read or written by any agent |
+| `## Review Notes Fixes` | Agent (impl-review-notes) | Exploration, plan, and implementation notes for Architect Review Notes fixes |
 
 `impl-assist` verifies completion by reading actual code — a checked checkbox is a hint, not
 proof. Running impl-assist on an already-implemented task is safe; it will skip.

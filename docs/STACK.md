@@ -63,6 +63,36 @@ Design services and APIs around document/workspace concepts, not only "my notes"
 `user_id` ownership is sufficient for MVP, but avoid backend boundaries that would block a future
 `workspace_id`.
 
+## Frontend Code Organization
+
+- Components are arrow-function components. When props are accepted, type them as `React.FC<Props>`.
+- Keep one primary component per file. Extract repeated or responsibility-specific JSX into
+  colocated `components/` files under the owning module or root component.
+- Local state/effect clusters belong in focused colocated hooks under `hooks/`; name effect bodies
+  with an `Fx` suffix, for example `useEffect(function syncRouteFx() {}, [])`.
+- Use `type` for object types. Do not introduce handwritten `interface` types except generated
+  OpenAPI output or declaration merging files that require interfaces.
+- Module-wide reusable types belong in `module-name.types.ts` and should be exported from a
+  namespace such as `DocumentTreeTypes` or `RichTextEditorTypes`.
+- Keep module utilities in `utils/`, constants and static configs in `constants/`, and contexts in
+  `context/`. Promote code to `shared`, `entities`, or `features` only when it is reused outside
+  the owning module.
+- App code must use `@/shared/lib/router` `useRouter` for route params, navigation, browser
+  history actions, location state, and route path builders. Direct React Router routing hooks stay
+  inside that wrapper.
+- App code must use `@/shared/lib/search-params` `useSearchParams` for URL search params. Each
+  caller must provide a Zod schema and fallback value; direct React Router `useSearchParams` stays
+  inside that wrapper.
+- Do not destructure component props, method arguments, custom hook params, or object-returning hook
+  results in implementation code. Components use `props.field`, custom hooks use `params.field`,
+  and methods use `args.field`; assign hook results to one named variable and read through dot
+  notation.
+- App-owned localStorage and app-owned JSON parsing/stringifying must go through
+  `@/shared/lib/safe-ls` and `@/shared/lib/safe-json`. Protocol serialization in API clients and
+  tests may use native JSON APIs where the browser/fetch contract requires it.
+- Date/time work must go through `@/shared/lib/date` so timestamps, epoch reads, and duration
+  presets stay consistent.
+
 ---
 
 ## Prerequisites
@@ -90,6 +120,10 @@ docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build
 Host `uv sync` and `pnpm install` are dependency setup commands only. Backend services, migrations,
 seeds, backend tests, PostgreSQL, Redis, and FastAPI must run through Docker Compose.
 
+Playwright E2E is the one documented exception to the Docker-only rule: browsers are installed once
+on the developer host and E2E tests run from the host against the frontend exposed at
+`http://localhost:3000`.
+
 ---
 
 ## Gate Commands
@@ -101,7 +135,7 @@ STACK.md` for those.
 
 | Gate check | Command | Preconditions / notes |
 |------------|---------|-----------------------|
-| Infrastructure / bootstrap | `cp .env.example .env && docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --build` | Run from repo root; waits through Docker healthchecks. |
+| Infrastructure / bootstrap | `cp .env.example .env && docker compose up -d --build` | Run from repo root; uses the development override and waits through Docker healthchecks. |
 | Migrations | `docker compose exec backend uv run alembic upgrade head` | Run from repo root after infrastructure is up. |
 | Backend / unit tests | `docker compose exec backend uv run pytest tests/ -v` | Run from repo root after infrastructure is up. |
 | Frontend prep | `docker compose exec frontend pnpm install` | Install frontend dependencies in the frontend container before frontend checks. |
@@ -109,7 +143,7 @@ STACK.md` for those.
 | Frontend type-check | `docker compose exec frontend pnpm typecheck` | |
 | Frontend unit tests | `docker compose exec frontend pnpm test` | |
 | E2E lint / determinism | `n/a` | |
-| E2E | `docker compose exec frontend pnpm test:e2e:chromium` | Requires app reachable at `localhost:3000` and API at `localhost:8000`. |
+| E2E | `cd frontend && pnpm test:e2e:local` | Manual local exception to Docker-only. First-time setup: `cd frontend && pnpm test:e2e:install`. Requires Docker stack reachable at `localhost:3000` and API at `localhost:8000`. |
 | Smoke | `curl -f http://localhost:8000/api/v1/health && curl -f http://localhost:3000/` | Requires Docker Compose stack from infrastructure gate. |
 
 If the project ships a helper script, declare it:
@@ -135,7 +169,8 @@ docker compose exec backend uv run pytest tests/ -v
 docker compose exec frontend pnpm generate:api
 docker compose exec frontend pnpm typecheck
 docker compose exec frontend pnpm test
-docker compose exec frontend pnpm test:e2e:chromium
+cd frontend && pnpm test:e2e:install # first local setup only
+cd frontend && pnpm test:e2e:local
 ```
 
 ---
